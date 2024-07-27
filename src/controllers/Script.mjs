@@ -23,7 +23,7 @@ document.getElementById('edgeForm').addEventListener('submit', (e) => {
     if (v1 && v2 && !isNaN(weight)) {
         if (graph.map.has(v1) && graph.map.has(v2)) {
             graph.addConexion(v1, v2, weight);
-            alert(`Conexion de "${v1}" a "${v2}" agregada con una distancia de ${weight} km`);
+            alert(`Conexión de "${v1}" a "${v2}" agregada con una distancia de ${weight} km`);
             document.getElementById('startVertex').value = '';
             document.getElementById('endVertex').value = '';
             document.getElementById('weightInput').value = '';
@@ -37,51 +37,28 @@ document.getElementById('edgeForm').addEventListener('submit', (e) => {
 });
 
 document.getElementById('dfsButton').addEventListener('click', () => {
-    const startVertex = graph.map.keys().next().value;
-    if (startVertex) {
-        const result = graph.dfs(startVertex);
-        if (result) {
-            const { path, distance } = result;
-            const resultString = `${path.join(' -> ')} (Distancia: ${distance} km)`;
-            updateResultTable('DFS', resultString);
-        } else {
-            updateResultTable('DFS', 'No se encontro la ruta');
-        }
+    const startVertex = document.getElementById('dfsinput').value.trim();
+    if (startVertex && graph.map.has(startVertex)) {
+        const result = graph.dfs(startVertex, (vertex) => {
+            console.log(`Visited: ${vertex}`);
+        });
+        const resultString = result.path.join(' -> ');
+        updateResultTable('DFS', resultString);
     } else {
-        alert('No hay lugares en el grafo.');
-    }
-});
-
-document.getElementById('bfsButton').addEventListener('click', () => {
-    const startVertex = graph.map.keys().next().value;
-    if (startVertex) {
-        const result = graph.bfs(startVertex);
-        if (result) {
-            const { path, distance } = result;
-            const resultString = `${path.join(' -> ')} (Distancia: ${distance} km)`;
-            updateResultTable('BFS', resultString);
-        } else {
-            updateResultTable('BFS', 'No se encontro la ruta');
-        }
-    } else {
-        alert('No hay lugares en el grafo.');
+        alert('Por favor ingrese un lugar valido para el inicio del DFS.');
     }
 });
 
 document.getElementById('dijkstraButton').addEventListener('click', () => {
     const startVertex = document.getElementById('startDijkstra').value.trim();
-    const targetVertex = document.getElementById('endDijkstra').value.trim();
-    if (startVertex && targetVertex) {
-        const result = graph.dijkstra(startVertex, targetVertex);
-        if (result) {
-            const { path, distance } = result;
-            const resultString = `${path.join(' -> ')} (Distancia: ${distance} km)`;
-            updateResultTable('Dijkstra', resultString);
-        } else {
-            updateResultTable('Dijkstra', 'No se encontro la ruta');
-        }
+    if (startVertex && graph.map.has(startVertex)) {
+        const result = graph.dijkstra(startVertex);
+        const resultString = Object.entries(result)
+            .map(([vertex, distance]) => `${vertex}: ${distance} km`)
+            .join('<br>');
+        updateResultTable('Dijkstra', resultString);
     } else {
-        alert('Por favor ingrese lugares validos para el inicio y el destino.');
+        alert('Por favor ingrese un lugar valido para el inicio de Dijkstra.');
     }
 });
 
@@ -116,7 +93,7 @@ function updateResultTable(algorithm, result) {
     row.appendChild(algorithmCell);
 
     const resultCell = document.createElement('td');
-    resultCell.innerText = result;
+    resultCell.innerHTML = result;
     row.appendChild(resultCell);
 
     tableBody.appendChild(row);

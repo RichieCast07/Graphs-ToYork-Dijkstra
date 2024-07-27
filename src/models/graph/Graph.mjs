@@ -8,16 +8,13 @@ class Graph {
 
     addVertex(key) {
         if (!this.map.has(key)) {
-            const list = new LinkedList();
-            this.adjList.push(list);
+            this.adjList.push(new LinkedList());
             this.map.set(key, this.adjList.length - 1);
         }
     }
 
     addVertices(...vertices) {
-        for (const vertex of vertices) {
-            this.addVertex(vertex);
-        }
+        vertices.forEach(vertex => this.addVertex(vertex));
     }
 
     addConexion(v1, v2, weight = 1) {
@@ -29,127 +26,96 @@ class Graph {
         }
     }
 
-    bfs(startVertex) {
-        const visited = new Set();
-        const queue = [[startVertex, 0, [startVertex]]];
-
-        visited.add(startVertex);
-
-        while (queue.length) {
-            const [vertex, dist, path] = queue.shift();
-            const idx = this.map.get(vertex);
-            this.adjList[idx].run((adj) => {
-                if (!visited.has(adj.key)) {
-                    visited.add(adj.key);
-                    queue.push([adj.key, dist + adj.weight, [...path, adj.key]]);
-                }
-            });
-        }
-
-        const pathArray = Array.from(visited);
-        const totalDistance = pathArray.reduce((acc, vertex, i, arr) => {
-            if (i === 0) return acc;
-            const prevVertex = arr[i - 1];
-            const idx = this.map.get(prevVertex);
-            let weight = 0;
-            this.adjList[idx].run((adj) => {
-                if (adj.key === vertex) {
-                    weight = adj.weight;
-                }
-            });
-            return acc + weight;
-        }, 0);
-
-        return { path: pathArray, distance: totalDistance };
-    }
-
-    dfs(startVertex) {
+    dfs(startVertex, callback) {
         const visited = new Set();
         const path = [];
-        let totalDistance = 0;
 
-        const dfsRecursive = (vertex, dist) => {
+        const dfsRecursive = (vertex) => {
             if (visited.has(vertex)) return;
             visited.add(vertex);
             path.push(vertex);
-            totalDistance += dist;
+            callback(vertex);
 
             const idx = this.map.get(vertex);
             this.adjList[idx].run((adj) => {
                 if (!visited.has(adj.key)) {
-                    dfsRecursive(adj.key, adj.weight);
+                    dfsRecursive(adj.key);
                 }
             });
         };
 
-        dfsRecursive(startVertex, 0);
-
-        return { path, distance: totalDistance };
+        dfsRecursive(startVertex);
+        return { path };
     }
 
-    dijkstra(startVertex, targetVertex) {
-        const distances = new Map([...this.map.keys()].map(k => [k, Infinity]));
-        const previous = new Map();
-        const pq = new PriorityQueue();
+    dijkstra(startVertex) {
+        const INF = 100000;
+        const l = []; // Conjunto de vertices visitados
+        const v = []; // Conjunto de vertices
+        const lp = []; // Conjunto de vertices no visitados
+        const d = []; // Conjunto de distancias
+        const dp = []; // Conjunto de distancias temporales
 
-        distances.set(startVertex, 0);
-        pq.enqueue(startVertex, 0);
+        const numVertices = this.map.size;
 
-        while (!pq.isEmpty()) {
-            const { element: currentVertex } = pq.dequeue();
-
-            if (currentVertex === targetVertex) {
-                const path = [];
-                let distance = 0;
-                for (let at = targetVertex; at; at = previous.get(at)) {
-                    path.unshift(at);
-                }
-                for (let i = 0; i < path.length - 1; i++) {
-                    const idx = this.map.get(path[i]);
-                    this.adjList[idx].run((adj) => {
-                        if (adj.key === path[i + 1]) {
-                            distance += adj.weight;
-                        }
-                    });
-                }
-                return { path, distance };
-            }
-
-            this.adjList[this.map.get(currentVertex)].run((adj) => {
-                const alt = distances.get(currentVertex) + adj.weight;
-                if (alt < distances.get(adj.key)) {
-                    distances.set(adj.key, alt);
-                    previous.set(adj.key, currentVertex);
-                    pq.enqueue(adj.key, alt);
-                }
-            });
+        // Inicializa sus valores
+        for (let i = 0; i < numVertices; i++) {
+            v[i] = i;
+            lp[i] = v[i];
+            d[i] = INF;
+            dp[i] = INF;
         }
 
-        return null;
+        const startIdx = this.map.get(startVertex);
+        d[startIdx] = 0;
+        dp[startIdx] = 0;
+
+        while (l.length != v.length) {
+            // Encuentra el vertice con la distancia minima que no ha sido visitado
+            let min = INF;
+            let minIndex = -1;
+
+            for (let i = 0; i < v.length; i++) {
+                if (lp[i] !== null && dp[i] < min) {
+                    min = dp[i];
+                    minIndex = i;
+                }
+            }
+
+            if (minIndex === -1) break; // Todos los vértices accesibles han sido visitados
+
+            l.push(minIndex); // Marca el vertice como visitado
+            lp[minIndex] = null; // Elimina el vertice del conjunto de no visitados
+
+            const idx = minIndex;
+
+            // Actualiza las distancias a los vertices adyacentes
+            this.adjList[idx].run((adj) => {
+                const adjIdx = this.map.get(adj.key);
+                const alt = dp[idx] + adj.weight;
+                if (alt < dp[adjIdx]) {
+                    dp[adjIdx] = alt;
+                }
+            });
+
+            for (let i = 0; i < v.length; i++) {
+                if (d[i] === INF && dp[i] !== INF && dp[i] >= 0) {
+                    d[i] = dp[i];
+                }
+            }
+        }
+
+        const result = {};
+        this.map.forEach((index, vertex) => {
+            result[vertex] = d[index];
+        });
+
+        return result;
     }
 
     clear() {
         this.map.clear();
         this.adjList = [];
-    }
-}
-
-class PriorityQueue {
-    constructor() {
-        this.items = [];
-    }
-
-    enqueue(element, priority) {
-        this.items.push({ element, priority });
-        this.items.sort((a, b) => a.priority - b.priority);
-    }
-
-    dequeue() {
-        return this.items.shift();
-    }
-
-    isEmpty() {
-        return !this.items.length;
     }
 }
 

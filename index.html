@@ -8,7 +8,7 @@
 </head>
 <body>
     <nav class="navbar">
-        <h1>Rutas TonaYork</h1>
+        <img src="./src//assets/rutastoyork.png" alt="Logo" class="logo">
     </nav>
     <div class="container">
         <div class="input-section">
@@ -29,15 +29,14 @@
                 </form>
             </div>
             <div class="form-group" id="dfs-bfs-group">
-                <h2>Calcular Ruta DFS/BFS</h2>
+                <h2>Calcular Ruta (DFS)</h2>
+                <input type="text" id="dfsinput" placeholder="Lugar">
                 <button type="button" id="dfsButton">DFS</button>
-                <button type="button" id="bfsButton">BFS</button>
             </div>
             <div class="form-group" id="dijkstra-group">
-                <h2>Calcular Ruta Dijkstra</h2>
+                <h2>Calcular Ruta (Dijkstra)</h2>
                 <form id="dijkstraForm">
                     <input type="text" id="startDijkstra" placeholder="Lugar de inicio">
-                    <input type="text" id="endDijkstra" placeholder="Lugar de destino">
                     <button type="button" id="dijkstraButton">Dijkstra</button>
                 </form>
             </div>
@@ -45,12 +44,12 @@
         <div class="output-section">
             <div class="tables-section">
                 <div>
-                    <h2>Lugares y Conexiones</h2>
+                    <h2>Lugares y Rutas</h2>
                     <table id="graphTable" class="graph-table">
                         <thead>
                             <tr>
                                 <th>Lugar</th>
-                                <th>Conexiones</th>
+                                <th>Rutas</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -59,7 +58,7 @@
                     </table>
                 </div>
                 <div>
-                    <h2>Resultados de Algoritmos</h2>
+                    <h2>Resultados de Rutas</h2>
                     <table id="resultTable" class="graph-table">
                         <thead>
                             <tr>
