@@ -50,15 +50,14 @@ class Graph {
 
     dijkstra(startVertex) {
         const INF = 100000;
-        const l = []; // Conjunto de vertices visitados
-        const v = []; // Conjunto de vertices
-        const lp = []; // Conjunto de vertices no visitados
-        const d = []; // Conjunto de distancias
-        const dp = []; // Conjunto de distancias temporales
+        const l = [];
+        const v = [];
+        const lp = [];
+        const d = [];
+        const dp = [];
 
         const numVertices = this.map.size;
 
-        // Inicializa sus valores
         for (let i = 0; i < numVertices; i++) {
             v[i] = i;
             lp[i] = v[i];
@@ -71,7 +70,6 @@ class Graph {
         dp[startIdx] = 0;
 
         while (l.length != v.length) {
-            // Encuentra el vertice con la distancia minima que no ha sido visitado
             let min = INF;
             let minIndex = -1;
 
@@ -82,14 +80,12 @@ class Graph {
                 }
             }
 
-            if (minIndex === -1) break; // Todos los vértices accesibles han sido visitados
+            if (minIndex === -1) break;
 
-            l.push(minIndex); // Marca el vertice como visitado
-            lp[minIndex] = null; // Elimina el vertice del conjunto de no visitados
-
+            l.push(minIndex);
+            lp[minIndex] = null;
             const idx = minIndex;
 
-            // Actualiza las distancias a los vertices adyacentes
             this.adjList[idx].run((adj) => {
                 const adjIdx = this.map.get(adj.key);
                 const alt = dp[idx] + adj.weight;
